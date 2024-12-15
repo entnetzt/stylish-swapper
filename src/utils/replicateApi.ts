@@ -6,7 +6,7 @@ interface PredictionResponse {
 
 export const startPrediction = async (
   personBase64: string,
-  garmentBase64: string,
+  garmentImage: string,
   apiKey: string,
   proxyUrl: string
 ): Promise<PredictionResponse> => {
@@ -18,10 +18,10 @@ export const startPrediction = async (
       'Origin': window.location.origin,
     },
     body: JSON.stringify({
-      version: "f86afe8723b0416c99ca1706b9605741657009bf1c84f021669f4b3edf36aa67",
+      version: "8de1bdcc13ca1c4ab4d4f8c1836e4c69f89c227e43fc0bd0468ad2d2a6006ef4",
       input: {
         image: `data:image/jpeg;base64,${personBase64}`,
-        target: `data:image/jpeg;base64,${garmentBase64}`,
+        target: `data:image/jpeg;base64,${garmentImage}`,
         use_mask: true
       }
     })
