@@ -18,10 +18,10 @@ export const startPrediction = async (
       'Origin': window.location.origin,
     },
     body: JSON.stringify({
-      version: "9fdabfbe13e3d0b450fdf499f84686e27b76b21c44a2c5d4b25c42d3465c0911",
+      version: "8c7c2b43f2dc8cd53c6f626d5f7798984a0d12a36329928dd914673133d1a01b",
       input: {
-        person_image: `data:image/jpeg;base64,${personBase64}`,
-        cloth_image: `data:image/jpeg;base64,${garmentBase64}`
+        image: `data:image/jpeg;base64,${personBase64}`,
+        target: `data:image/jpeg;base64,${garmentBase64}`
       }
     })
   });
