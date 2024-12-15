@@ -65,7 +65,6 @@ const VirtualTryOn = () => {
       const personBase64 = await fileToBase64(personImage);
       const garmentBase64 = await fileToBase64(garmentImage);
 
-      // Using cors-anywhere as a proxy
       const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
       const targetUrl = 'https://api.replicate.com/v1/predictions';
 
@@ -77,16 +76,17 @@ const VirtualTryOn = () => {
           'Origin': window.location.origin,
         },
         body: JSON.stringify({
-          version: "c86b353e1c1fec2a5ea9d5d18312ef4a3bda9bb29e8f0e899f65f2b0c7c4e2d3",
+          version: "8c7c2b43f2dc8cd53c6f626d5f7798984a0d12a36329928dd914673133d1a01b",
           input: {
-            person_image: personBase64,
-            garment_image: garmentBase64
+            image: personBase64,
+            target: garmentBase64
           }
         })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to start prediction');
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to start prediction');
       }
 
       const prediction = await response.json();
@@ -105,7 +105,7 @@ const VirtualTryOn = () => {
       console.error('Error:', error);
       toast({
         title: "Error",
-        description: "Failed to generate the virtual try-on. Please try again.",
+        description: error.message || "Failed to generate the virtual try-on. Please try again.",
         variant: "destructive"
       });
     } finally {
