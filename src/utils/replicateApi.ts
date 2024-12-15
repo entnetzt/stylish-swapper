@@ -18,7 +18,7 @@ export const startPrediction = async (
       'Origin': window.location.origin,
     },
     body: JSON.stringify({
-      version: "7af9ea6fe8bfa9a0f4b6f0b4389525a8c49a3f349d92de6f6c80d86d3f1fe11f",
+      version: "f86afe8723b0416c99ca1706b9605741657009bf1c84f021669f4b3edf36aa67",
       input: {
         image: `data:image/jpeg;base64,${personBase64}`,
         target: `data:image/jpeg;base64,${garmentBase64}`,
