@@ -20,8 +20,8 @@ export const startPrediction = async (
     body: JSON.stringify({
       version: "9fdabfbe13e3d0b450fdf499f84686e27b76b21c44a2c5d4b25c42d3465c0911",
       input: {
-        image: personBase64,
-        target: garmentBase64
+        person_image: `data:image/jpeg;base64,${personBase64}`,
+        cloth_image: `data:image/jpeg;base64,${garmentBase64}`
       }
     })
   });
