@@ -38,26 +38,100 @@ const VirtualTryOn = () => {
     setIsLoading(true);
     
     try {
-      // Here we would normally make the API call to Replicate
-      // For now, we'll just simulate a delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      toast({
-        title: "Success!",
-        description: "Your virtual try-on has been generated.",
+      // Convert images to base64
+      const personBase64 = await fileToBase64(personImage);
+      const garmentBase64 = await fileToBase64(garmentImage);
+
+      // Make API call to Replicate
+      const response = await fetch('https://api.replicate.com/v1/predictions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Token ${import.meta.env.VITE_REPLICATE_API_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          version: "c86b353e1c1fec2a5ea9d5d18312ef4a3bda9bb29e8f0e899f65f2b0c7c4e2d3",
+          input: {
+            person_image: personBase64,
+            garment_image: garmentBase64
+          }
+        })
       });
+
+      if (!response.ok) {
+        throw new Error('Failed to start prediction');
+      }
+
+      const prediction = await response.json();
       
-      // For demo purposes, we'll just show the garment image as the result
-      setResultImage(garmentPreview);
+      // Poll for results
+      let result = await pollPrediction(prediction.id);
+      
+      if (result.status === 'succeeded') {
+        setResultImage(result.output);
+        toast({
+          title: "Success!",
+          description: "Your virtual try-on has been generated.",
+        });
+      } else {
+        throw new Error('Prediction failed');
+      }
     } catch (error) {
+      console.error('Error:', error);
       toast({
         title: "Error",
-        description: "Failed to generate the virtual try-on.",
+        description: "Failed to generate the virtual try-on. Please try again.",
         variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          // Remove the data:image/[type];base64, prefix
+          const base64 = reader.result.split(',')[1];
+          resolve(base64);
+        }
+      };
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const pollPrediction = async (predictionId: string): Promise<any> => {
+    const maxAttempts = 60; // 5 minutes with 5-second intervals
+    let attempts = 0;
+
+    while (attempts < maxAttempts) {
+      const response = await fetch(`https://api.replicate.com/v1/predictions/${predictionId}`, {
+        headers: {
+          'Authorization': `Token ${import.meta.env.VITE_REPLICATE_API_TOKEN}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to check prediction status');
+      }
+
+      const prediction = await response.json();
+
+      if (prediction.status === 'succeeded') {
+        return prediction;
+      } else if (prediction.status === 'failed') {
+        throw new Error('Prediction failed');
+      }
+
+      // Wait 5 seconds before next attempt
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      attempts++;
+    }
+
+    throw new Error('Prediction timed out');
   };
 
   return (
