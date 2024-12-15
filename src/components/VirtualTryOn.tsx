@@ -65,11 +65,16 @@ const VirtualTryOn = () => {
       const personBase64 = await fileToBase64(personImage);
       const garmentBase64 = await fileToBase64(garmentImage);
 
-      const response = await fetch('https://api.replicate.com/v1/predictions', {
+      // Using cors-anywhere as a proxy
+      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+      const targetUrl = 'https://api.replicate.com/v1/predictions';
+
+      const response = await fetch(proxyUrl + targetUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Token ${apiKey}`,
           'Content-Type': 'application/json',
+          'Origin': window.location.origin,
         },
         body: JSON.stringify({
           version: "c86b353e1c1fec2a5ea9d5d18312ef4a3bda9bb29e8f0e899f65f2b0c7c4e2d3",
@@ -85,7 +90,7 @@ const VirtualTryOn = () => {
       }
 
       const prediction = await response.json();
-      let result = await pollPrediction(prediction.id);
+      let result = await pollPrediction(prediction.id, proxyUrl);
       
       if (result.status === 'succeeded') {
         setResultImage(result.output);
@@ -108,14 +113,15 @@ const VirtualTryOn = () => {
     }
   };
 
-  const pollPrediction = async (predictionId: string): Promise<any> => {
+  const pollPrediction = async (predictionId: string, proxyUrl: string): Promise<any> => {
     const maxAttempts = 60;
     let attempts = 0;
 
     while (attempts < maxAttempts) {
-      const response = await fetch(`https://api.replicate.com/v1/predictions/${predictionId}`, {
+      const response = await fetch(`${proxyUrl}https://api.replicate.com/v1/predictions/${predictionId}`, {
         headers: {
           'Authorization': `Token ${apiKey}`,
+          'Origin': window.location.origin,
         },
       });
 
