@@ -4,16 +4,16 @@ import { useToast } from '@/components/ui/use-toast';
 import ImageUpload from './ImageUpload';
 import { Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useTryOn } from '@/hooks/useTryOn';
 
 const VirtualTryOn = () => {
   const [personImage, setPersonImage] = useState<File | null>(null);
   const [garmentImage, setGarmentImage] = useState<File | null>(null);
   const [personPreview, setPersonPreview] = useState<string>('');
   const [garmentPreview, setGarmentPreview] = useState<string>('');
-  const [resultImage, setResultImage] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const { toast } = useToast();
+  const { isLoading, resultImage, generateTryOn } = useTryOn();
 
   useEffect(() => {
     const savedApiKey = localStorage.getItem('replicate_api_key');
@@ -59,103 +59,7 @@ const VirtualTryOn = () => {
       return;
     }
 
-    setIsLoading(true);
-    
-    try {
-      const personBase64 = await fileToBase64(personImage);
-      const garmentBase64 = await fileToBase64(garmentImage);
-
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-      const targetUrl = 'https://api.replicate.com/v1/predictions';
-
-      const response = await fetch(proxyUrl + targetUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${apiKey}`,
-          'Content-Type': 'application/json',
-          'Origin': window.location.origin,
-        },
-        body: JSON.stringify({
-          version: "8c7c2b43f2dc8cd53c6f626d5f7798984a0d12a36329928dd914673133d1a01b",
-          input: {
-            image: personBase64,
-            target: garmentBase64
-          }
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to start prediction');
-      }
-
-      const prediction = await response.json();
-      let result = await pollPrediction(prediction.id, proxyUrl);
-      
-      if (result.status === 'succeeded') {
-        setResultImage(result.output);
-        toast({
-          title: "Success!",
-          description: "Your virtual try-on has been generated.",
-        });
-      } else {
-        throw new Error('Prediction failed');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to generate the virtual try-on. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const pollPrediction = async (predictionId: string, proxyUrl: string): Promise<any> => {
-    const maxAttempts = 60;
-    let attempts = 0;
-
-    while (attempts < maxAttempts) {
-      const response = await fetch(`${proxyUrl}https://api.replicate.com/v1/predictions/${predictionId}`, {
-        headers: {
-          'Authorization': `Token ${apiKey}`,
-          'Origin': window.location.origin,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to check prediction status');
-      }
-
-      const prediction = await response.json();
-
-      if (prediction.status === 'succeeded') {
-        return prediction;
-      } else if (prediction.status === 'failed') {
-        throw new Error('Prediction failed');
-      }
-
-      await new Promise(resolve => setTimeout(resolve, 5000));
-      attempts++;
-    }
-
-    throw new Error('Prediction timed out');
-  };
-
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          const base64 = reader.result.split(',')[1];
-          resolve(base64);
-        }
-      };
-      reader.onerror = error => reject(error);
-    });
+    await generateTryOn(personImage, garmentImage, apiKey);
   };
 
   return (
