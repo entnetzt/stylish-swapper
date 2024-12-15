@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import ImageUpload from './ImageUpload';
 import { Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 const VirtualTryOn = () => {
   const [personImage, setPersonImage] = useState<File | null>(null);
@@ -11,7 +12,21 @@ const VirtualTryOn = () => {
   const [garmentPreview, setGarmentPreview] = useState<string>('');
   const [resultImage, setResultImage] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [apiKey, setApiKey] = useState('');
   const { toast } = useToast();
+
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('replicate_api_key');
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+    }
+  }, []);
+
+  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newApiKey = e.target.value;
+    setApiKey(newApiKey);
+    localStorage.setItem('replicate_api_key', newApiKey);
+  };
 
   const handlePersonImageSelect = (file: File) => {
     setPersonImage(file);
@@ -35,18 +50,25 @@ const VirtualTryOn = () => {
       return;
     }
 
+    if (!apiKey) {
+      toast({
+        title: "Missing API Key",
+        description: "Please enter your Replicate API key.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
     
     try {
-      // Convert images to base64
       const personBase64 = await fileToBase64(personImage);
       const garmentBase64 = await fileToBase64(garmentImage);
 
-      // Make API call to Replicate
       const response = await fetch('https://api.replicate.com/v1/predictions', {
         method: 'POST',
         headers: {
-          'Authorization': `Token ${import.meta.env.VITE_REPLICATE_API_TOKEN}`,
+          'Authorization': `Token ${apiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
@@ -63,8 +85,6 @@ const VirtualTryOn = () => {
       }
 
       const prediction = await response.json();
-      
-      // Poll for results
       let result = await pollPrediction(prediction.id);
       
       if (result.status === 'succeeded') {
@@ -88,29 +108,14 @@ const VirtualTryOn = () => {
     }
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          // Remove the data:image/[type];base64, prefix
-          const base64 = reader.result.split(',')[1];
-          resolve(base64);
-        }
-      };
-      reader.onerror = error => reject(error);
-    });
-  };
-
   const pollPrediction = async (predictionId: string): Promise<any> => {
-    const maxAttempts = 60; // 5 minutes with 5-second intervals
+    const maxAttempts = 60;
     let attempts = 0;
 
     while (attempts < maxAttempts) {
       const response = await fetch(`https://api.replicate.com/v1/predictions/${predictionId}`, {
         headers: {
-          'Authorization': `Token ${import.meta.env.VITE_REPLICATE_API_TOKEN}`,
+          'Authorization': `Token ${apiKey}`,
         },
       });
 
@@ -126,12 +131,25 @@ const VirtualTryOn = () => {
         throw new Error('Prediction failed');
       }
 
-      // Wait 5 seconds before next attempt
       await new Promise(resolve => setTimeout(resolve, 5000));
       attempts++;
     }
 
     throw new Error('Prediction timed out');
+  };
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          const base64 = reader.result.split(',')[1];
+          resolve(base64);
+        }
+      };
+      reader.onerror = error => reject(error);
+    });
   };
 
   return (
@@ -140,6 +158,20 @@ const VirtualTryOn = () => {
         <h1 className="text-4xl font-bold text-fashion-DEFAULT mb-2">Virtual Try-On</h1>
         <p className="text-fashion-muted mb-8">Upload a photo of yourself and a garment to try it on virtually</p>
         
+        <div className="mb-8">
+          <label htmlFor="apiKey" className="block text-sm font-medium text-gray-700 mb-2">
+            Replicate API Key
+          </label>
+          <Input
+            id="apiKey"
+            type="password"
+            value={apiKey}
+            onChange={handleApiKeyChange}
+            placeholder="Enter your Replicate API key"
+            className="max-w-md"
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
           <div>
             <h2 className="text-xl font-semibold mb-4">Person Image</h2>
@@ -162,7 +194,7 @@ const VirtualTryOn = () => {
         <div className="flex justify-center mb-8">
           <Button
             onClick={handleGenerate}
-            disabled={isLoading || !personImage || !garmentImage}
+            disabled={isLoading || !personImage || !garmentImage || !apiKey}
             className="w-full md:w-auto"
           >
             {isLoading ? (
