@@ -35,7 +35,7 @@ export const startPrediction = async (
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
+    const errorData = await response.json().catch(() => ({}));
     console.error('Prediction request failed:', {
       status: response.status,
       statusText: response.statusText,
@@ -44,7 +44,8 @@ export const startPrediction = async (
     throw new Error(errorData.detail || 'Failed to start prediction');
   }
 
-  return response.json();
+  const data = await response.json();
+  return data;
 };
 
 export const checkPredictionStatus = async (
@@ -63,7 +64,8 @@ export const checkPredictionStatus = async (
   );
 
   if (!response.ok) {
-    throw new Error('Failed to check prediction status');
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Failed to check prediction status');
   }
 
   return response.json();
