@@ -11,7 +11,7 @@ export const startPrediction = async (
   proxyUrl: string
 ): Promise<PredictionResponse> => {
   const requestBody = {
-    version: "f86afe8723b0416c99ca1706b9605741657009bf1c84f021669f4b3edf36aa67",
+    version: "9dd277ca36d47a17c9641d323a82dbcd9baba4e26c9dc2def154c4c2b571e94e",
     input: {
       person: `data:image/jpeg;base64,${personBase64}`,
       cloth: `data:image/jpeg;base64,${garmentBase64}`,
