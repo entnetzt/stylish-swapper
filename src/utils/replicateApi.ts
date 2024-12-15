@@ -10,6 +10,20 @@ export const startPrediction = async (
   apiKey: string,
   proxyUrl: string
 ): Promise<PredictionResponse> => {
+  const requestBody = {
+    version: "f86afe8723b0416c99ca1706b9605741657009bf1c84f021669f4b3edf36aa67",
+    input: {
+      person: `data:image/jpeg;base64,${personBase64}`,
+      cloth: `data:image/jpeg;base64,${garmentBase64}`,
+    }
+  };
+
+  console.log('Making prediction request with:', {
+    url: `${proxyUrl}https://api.replicate.com/v1/predictions`,
+    version: requestBody.version,
+    inputKeys: Object.keys(requestBody.input)
+  });
+
   const response = await fetch(`${proxyUrl}https://api.replicate.com/v1/predictions`, {
     method: 'POST',
     headers: {
@@ -17,17 +31,16 @@ export const startPrediction = async (
       'Content-Type': 'application/json',
       'Origin': window.location.origin,
     },
-    body: JSON.stringify({
-      version: "f86afe8723b0416c99ca1706b9605741657009bf1c84f021669f4b3edf36aa67",
-      input: {
-        person: `data:image/jpeg;base64,${personBase64}`,
-        cloth: `data:image/jpeg;base64,${garmentBase64}`,
-      }
-    })
+    body: JSON.stringify(requestBody)
   });
 
   if (!response.ok) {
     const errorData = await response.json();
+    console.error('Prediction request failed:', {
+      status: response.status,
+      statusText: response.statusText,
+      errorData
+    });
     throw new Error(errorData.detail || 'Failed to start prediction');
   }
 
