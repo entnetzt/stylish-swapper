@@ -14,8 +14,8 @@ export const startPrediction = async (
   const requestBody = {
     version: "c871bb9b046607b680449ecbae55fd8c6d945e0a1948644bf2361b3d021d3ff4",
     input: {
-      human_img: `data:image/jpeg;base64,${personBase64}`,
-      garm_img: `data:image/jpeg;base64,${garmentBase64}`,
+      human_img: personBase64.startsWith('data:') ? personBase64 : `data:image/jpeg;base64,${personBase64}`,
+      garm_img: garmentBase64.startsWith('data:') ? garmentBase64 : `data:image/jpeg;base64,${garmentBase64}`,
       garment_des: "clothing item"
     }
   };
