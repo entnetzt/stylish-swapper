@@ -4,7 +4,7 @@ interface PredictionResponse {
   output?: string;
 }
 
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+const CORS_PROXY = 'https://corsproxy.io/?';
 
 export const startPrediction = async (
   personBase64: string,
@@ -34,6 +34,7 @@ export const startPrediction = async (
         headers: {
           'Authorization': `Token ${apiKey}`,
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify(requestBody),
       }
@@ -69,6 +70,7 @@ export const checkPredictionStatus = async (
         headers: {
           'Authorization': `Token ${apiKey}`,
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
       }
     );
