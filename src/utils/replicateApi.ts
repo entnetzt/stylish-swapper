@@ -4,8 +4,6 @@ interface PredictionResponse {
   output?: string;
 }
 
-const CORS_PROXY = 'https://cors-anywhere.herokuapp.com/';
-
 export const startPrediction = async (
   personBase64: string,
   garmentBase64: string,
@@ -27,19 +25,17 @@ export const startPrediction = async (
   });
 
   try {
-    const response = await fetch(
-      `${CORS_PROXY}https://api.replicate.com/v1/predictions`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${apiKey}`,
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Origin': window.location.origin,
-        },
-        body: JSON.stringify(requestBody),
-      }
-    );
+    const response = await fetch('https://api.replicate.com/v1/predictions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Token ${apiKey}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      mode: 'cors',
+      credentials: 'include',
+      body: JSON.stringify(requestBody),
+    });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -65,15 +61,16 @@ export const checkPredictionStatus = async (
 ): Promise<PredictionResponse> => {
   try {
     const response = await fetch(
-      `${CORS_PROXY}https://api.replicate.com/v1/predictions/${predictionId}`,
+      `https://api.replicate.com/v1/predictions/${predictionId}`,
       {
         method: 'GET',
         headers: {
           'Authorization': `Token ${apiKey}`,
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'Origin': window.location.origin,
+          'Accept': 'application/json'
         },
+        mode: 'cors',
+        credentials: 'include'
       }
     );
 
