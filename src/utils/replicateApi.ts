@@ -4,7 +4,7 @@ interface PredictionResponse {
   output?: string;
 }
 
-const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+const CORS_PROXY = 'https://corsproxy.io/?';
 
 export const startPrediction = async (
   personBase64: string,
