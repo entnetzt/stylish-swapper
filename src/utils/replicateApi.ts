@@ -7,8 +7,7 @@ interface PredictionResponse {
 export const startPrediction = async (
   personBase64: string,
   garmentBase64: string,
-  apiKey: string,
-  proxyUrl: string
+  apiKey: string
 ): Promise<PredictionResponse> => {
   const requestBody = {
     version: "c871bb9b046607b680449ecbae55fd8c6d945e0a1948644bf2361b3d021d3ff4",
@@ -20,17 +19,16 @@ export const startPrediction = async (
   };
 
   console.log('Making prediction request with:', {
-    url: `${proxyUrl}https://api.replicate.com/v1/predictions`,
+    url: 'https://api.replicate.com/v1/predictions',
     version: requestBody.version,
     inputKeys: Object.keys(requestBody.input)
   });
 
-  const response = await fetch(`${proxyUrl}https://api.replicate.com/v1/predictions`, {
+  const response = await fetch('https://api.replicate.com/v1/predictions', {
     method: 'POST',
     headers: {
       'Authorization': `Token ${apiKey}`,
       'Content-Type': 'application/json',
-      'Origin': window.location.origin,
     },
     body: JSON.stringify(requestBody)
   });
@@ -51,15 +49,14 @@ export const startPrediction = async (
 
 export const checkPredictionStatus = async (
   predictionId: string,
-  apiKey: string,
-  proxyUrl: string
+  apiKey: string
 ): Promise<PredictionResponse> => {
   const response = await fetch(
-    `${proxyUrl}https://api.replicate.com/v1/predictions/${predictionId}`,
+    `https://api.replicate.com/v1/predictions/${predictionId}`,
     {
       headers: {
         'Authorization': `Token ${apiKey}`,
-        'Origin': window.location.origin,
+        'Content-Type': 'application/json',
       },
     }
   );

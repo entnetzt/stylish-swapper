@@ -16,16 +16,14 @@ export const useTryOn = () => {
     try {
       const personBase64 = await fileToBase64(personImage);
       const garmentBase64 = await fileToBase64(garmentImage);
-      const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
 
       const prediction = await startPrediction(
         personBase64,
         garmentBase64,
-        apiKey,
-        proxyUrl
+        apiKey
       );
 
-      let result = await pollPrediction(prediction.id, apiKey, proxyUrl);
+      let result = await pollPrediction(prediction.id, apiKey);
       
       if (result.status === 'succeeded') {
         setResultImage(result.output || '');
@@ -50,14 +48,13 @@ export const useTryOn = () => {
 
   const pollPrediction = async (
     predictionId: string,
-    apiKey: string,
-    proxyUrl: string
+    apiKey: string
   ): Promise<any> => {
     const maxAttempts = 60;
     let attempts = 0;
 
     while (attempts < maxAttempts) {
-      const prediction = await checkPredictionStatus(predictionId, apiKey, proxyUrl);
+      const prediction = await checkPredictionStatus(predictionId, apiKey);
 
       if (prediction.status === 'succeeded') {
         return prediction;
