@@ -29,13 +29,9 @@ export const startPrediction = async (
       method: 'POST',
       headers: {
         'Authorization': `Token ${apiKey}`,
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Content-Type': 'application/json'
       },
       mode: 'cors',
-      credentials: 'include',
       body: JSON.stringify(requestBody)
     });
 
@@ -68,13 +64,9 @@ export const checkPredictionStatus = async (
         method: 'GET',
         headers: {
           'Authorization': `Token ${apiKey}`,
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+          'Content-Type': 'application/json'
         },
-        mode: 'cors',
-        credentials: 'include',
+        mode: 'cors'
       }
     );
 
