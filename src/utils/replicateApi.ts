@@ -4,7 +4,7 @@ interface PredictionResponse {
   output?: string;
 }
 
-const CORS_PROXY = 'https://corsproxy.io/?';
+const CORS_PROXY = 'https://proxy.cors.sh/';
 
 export const startPrediction = async (
   personBase64: string,
@@ -28,13 +28,14 @@ export const startPrediction = async (
 
   try {
     const response = await fetch(
-      `${CORS_PROXY}${encodeURIComponent('https://api.replicate.com/v1/predictions')}`,
+      `${CORS_PROXY}api.replicate.com/v1/predictions`,
       {
         method: 'POST',
         headers: {
           'Authorization': `Token ${apiKey}`,
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'x-cors-api-key': 'temp_f44444444444444444444444444444444',
         },
         body: JSON.stringify(requestBody),
       }
@@ -64,13 +65,14 @@ export const checkPredictionStatus = async (
 ): Promise<PredictionResponse> => {
   try {
     const response = await fetch(
-      `${CORS_PROXY}${encodeURIComponent(`https://api.replicate.com/v1/predictions/${predictionId}`)}`,
+      `${CORS_PROXY}api.replicate.com/v1/predictions/${predictionId}`,
       {
         method: 'GET',
         headers: {
           'Authorization': `Token ${apiKey}`,
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'x-cors-api-key': 'temp_f44444444444444444444444444444444',
         },
       }
     );
