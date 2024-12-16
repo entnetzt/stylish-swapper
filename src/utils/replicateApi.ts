@@ -4,6 +4,8 @@ interface PredictionResponse {
   output?: string;
 }
 
+const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+
 export const startPrediction = async (
   personBase64: string,
   garmentBase64: string,
@@ -24,7 +26,7 @@ export const startPrediction = async (
     inputKeys: Object.keys(requestBody.input)
   });
 
-  const response = await fetch('https://api.replicate.com/v1/predictions', {
+  const response = await fetch(`${CORS_PROXY}${encodeURIComponent('https://api.replicate.com/v1/predictions')}`, {
     method: 'POST',
     headers: {
       'Authorization': `Token ${apiKey}`,
@@ -52,7 +54,7 @@ export const checkPredictionStatus = async (
   apiKey: string
 ): Promise<PredictionResponse> => {
   const response = await fetch(
-    `https://api.replicate.com/v1/predictions/${predictionId}`,
+    `${CORS_PROXY}${encodeURIComponent(`https://api.replicate.com/v1/predictions/${predictionId}`)}`,
     {
       headers: {
         'Authorization': `Token ${apiKey}`,
