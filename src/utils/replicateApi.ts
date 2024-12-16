@@ -4,8 +4,6 @@ interface PredictionResponse {
   output?: string;
 }
 
-const CORS_PROXY = 'https://corsproxy.io/?';
-
 export const startPrediction = async (
   personBase64: string,
   garmentBase64: string,
@@ -27,20 +25,14 @@ export const startPrediction = async (
   });
 
   try {
-    const response = await fetch(
-      `${CORS_PROXY}${encodeURIComponent('https://api.replicate.com/v1/predictions')}`, 
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Token ${apiKey}`,
-          'Content-Type': 'application/json',
-          'x-requested-with': 'XMLHttpRequest'
-        },
-        body: JSON.stringify(requestBody),
-        mode: 'cors',
-        credentials: 'omit'
-      }
-    );
+    const response = await fetch('https://api.replicate.com/v1/predictions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Token ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -66,16 +58,13 @@ export const checkPredictionStatus = async (
 ): Promise<PredictionResponse> => {
   try {
     const response = await fetch(
-      `${CORS_PROXY}${encodeURIComponent(`https://api.replicate.com/v1/predictions/${predictionId}`)}`,
+      `https://api.replicate.com/v1/predictions/${predictionId}`,
       {
         method: 'GET',
         headers: {
           'Authorization': `Token ${apiKey}`,
           'Content-Type': 'application/json',
-          'x-requested-with': 'XMLHttpRequest'
         },
-        mode: 'cors',
-        credentials: 'omit'
       }
     );
 
