@@ -33,9 +33,12 @@ export const startPrediction = async (
         method: 'POST',
         headers: {
           'Authorization': `Token ${apiKey}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'x-requested-with': 'XMLHttpRequest'
         },
-        body: JSON.stringify(requestBody)
+        body: JSON.stringify(requestBody),
+        mode: 'cors',
+        credentials: 'omit'
       }
     );
 
@@ -68,8 +71,11 @@ export const checkPredictionStatus = async (
         method: 'GET',
         headers: {
           'Authorization': `Token ${apiKey}`,
-          'Content-Type': 'application/json'
-        }
+          'Content-Type': 'application/json',
+          'x-requested-with': 'XMLHttpRequest'
+        },
+        mode: 'cors',
+        credentials: 'omit'
       }
     );
 
